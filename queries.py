@@ -3,7 +3,7 @@ import settings
 import util
 import progressbar
 import logging
-
+import traceback
 
 def query_price20LowerButAboutToReachCurrPrice(selected_sector:set=None):
     timestamp = util.getTimestamp("self")
@@ -19,25 +19,29 @@ def query_price20LowerButAboutToReachCurrPrice(selected_sector:set=None):
         for key in dict_m:
             dict_k = dict_m[key]
             # 排除ST
-            if "ST" in dict_k["name"]:
-                continue
-            # 排除次新
-            if "AvePrice_20" in dict_k and len(dict_k["AvePrice_20"]) > 250:
-                # 过滤条件
-                if selected_sector is not None:
-                    if "sector" not in dict_k or dict_k["sector"] not in selected_sector:
-                        continue
+            try:
+                if "ST" in dict_k["name"]:
+                    continue
+                # 排除次新
+                if "AvePrice_20" in dict_k and len(dict_k["AvePrice_20"]) > 250:
+                    # 过滤条件
+                    if selected_sector is not None:
+                        if "sector" not in dict_k or dict_k["sector"] not in selected_sector:
+                            continue
 
 
-                date_20Lower = [1 if dict_k["AvePrice_20"][-i]<dict_k["price_shou"][-i] else 0 for i in range(2, 12)]
-                if sum(date_20Lower) == 10 and \
-                        dict_k["price_shou"][-1] >= dict_k["AvePrice_20"][-1]*0.99 and \
-                        dict_k["price_shou"][-1] <= dict_k["AvePrice_20"][-1]*1.02:
-                    res[key] = dict_k["name"]
-                    found += 1
-                    queryInfo = "Found: ({}) {} {} {} {}".format(found,key,dict_k["name"], dict_k["price_shou"][-1] , dict_k["AvePrice_20"][-1])
-                    print(queryInfo)
-                    file.write(queryInfo+'\n')
+                    date_20Lower = [1 if dict_k["AvePrice_20"][-i]<dict_k["price_shou"][-i] else 0 for i in range(2, 12)]
+                    if sum(date_20Lower) == 10 and \
+                            dict_k["price_shou"][-1] >= dict_k["AvePrice_20"][-1]*0.99 and \
+                            dict_k["price_shou"][-1] <= dict_k["AvePrice_20"][-1]*1.02:
+                        res[key] = dict_k["name"]
+                        found += 1
+                        queryInfo = "Found: ({}) {} {} {} {}".format(found,key,dict_k["name"], dict_k["price_shou"][-1] , dict_k["AvePrice_20"][-1])
+                        print(queryInfo)
+                        file.write(queryInfo+'\n')
+            except Exception as ex:
+                print("遇到错误：" + str(dict_k))
+                traceback.print_exc()
 
     file.close()
     return res
@@ -96,20 +100,20 @@ if __name__ == '__main__':
     # match_result = query_price20LowerButAboutToReachCurrPrice()
     # print("Match result Num: "+str(len(match_result)))
     # print(match_result)
-    query_list = querySpecific({
-        "000066":[["3DayNetMoney","netMoney"],[None,-1]],
-        "002739":[["3DayNetMoney","netMoney"],[None,-1]],
-        "000063":[["3DayNetMoney","netMoney"],[None,-1]],
-        "000977":[["3DayNetMoney","netMoney"],[None,-1]],
-        "600663":[["3DayNetMoney","netMoney"],[None,-1]],
-        "603799":[["3DayNetMoney","netMoney"],[None,-1]],
-        "600104":[["3DayNetMoney","netMoney"],[None,-1]],
-        "603986":[["3DayNetMoney","netMoney"],[None,-1]],
-        "002887":[["3DayNetMoney","netMoney"],[None,-1]],
-
-                               })
-    for query in query_list:
-        print(query)
-    # print(query_price20LowerButAboutToReachCurrPrice())
+    # query_list = querySpecific({
+    #     "000066":[["3DayNetMoney","netMoney"],[None,-1]],
+    #     "002739":[["3DayNetMoney","netMoney"],[None,-1]],
+    #     "000063":[["3DayNetMoney","netMoney"],[None,-1]],
+    #     "000977":[["3DayNetMoney","netMoney"],[None,-1]],
+    #     "600663":[["3DayNetMoney","netMoney"],[None,-1]],
+    #     "603799":[["3DayNetMoney","netMoney"],[None,-1]],
+    #     "600104":[["3DayNetMoney","netMoney"],[None,-1]],
+    #     "603986":[["3DayNetMoney","netMoney"],[None,-1]],
+    #     "002887":[["3DayNetMoney","netMoney"],[None,-1]],
+    #
+    #                            })
+    # for query in query_list:
+    #     print(query)
+    print(query_price20LowerButAboutToReachCurrPrice())
     # dict_test = util.readDict("./batches/data_batch15.txt")
     # print(len(dict_test))

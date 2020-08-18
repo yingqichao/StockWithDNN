@@ -173,8 +173,9 @@ def update_daily_data(comitNewCrawl=False):
                     #     if "netMoney" not in dict_info:
                     #         dict_info["netMoney"] = []
                     #     dict_info["netMoney"].append(dict_netMoney[key])
-
-
+                    if "name" not in dict_info:
+                        dict_info["name"] = dict_newInfo["name"]
+                        print("[名字补充]"+dict_newInfo["name"])
                     for update_key in settings.direct_update_keys:
                         if update_key not in dict_info:
                             dict_info[update_key] = []
@@ -295,7 +296,9 @@ if __name__ == '__main__':
     # update_daily_data(comitNewCrawl=True)
     # lens = update_daily_data(comitNewCrawl=True)
     # if lens !=0:
-    update_daily_data(comitNewCrawl=True)
+    if update_daily_data(comitNewCrawl=True)>10:
+        # 尝试重新发起数据维护
+        update_daily_data(comitNewCrawl=False)
     # 为今天的新股手动加入到batch
     # dict_dirs = os.listdir(settings.dict_basedir)
     # dict_dir = settings.dict_basedir + "/" + dict_dirs[-1]
